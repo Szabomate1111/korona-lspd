@@ -22,8 +22,8 @@ DB_USER="tgf_user"
 DB_PASSWORD="tgf_pass_$(openssl rand -hex 8)"
 POSTGRES_PASSWORD="postgres_$(openssl rand -hex 8)"
 JWT_SECRET="jwt_secret_$(openssl rand -hex 32)"
-DEFAULT_ADMIN_DISCORD_ID="123456789012345678"  # Placeholder, will be replaced
-DEFAULT_ADMIN_USERNAME="admin"
+DEFAULT_ADMIN_DISCORD_ID="678640147503513600"  # Mate Discord ID
+DEFAULT_ADMIN_USERNAME="mate"
 DEFAULT_ADMIN_PASSWORD="mate1234"
 
 # Discord placeholders (user needs to set these)
@@ -180,7 +180,10 @@ echo -e "${GREEN}✓ Migrációk lefutottak${NC}"
 
 # Run seed
 echo -e "${YELLOW}🌱 Kezdeti adatok betöltése...${NC}"
-DEFAULT_ADMIN_PASSWORD="$DEFAULT_ADMIN_PASSWORD" node dist/utils/seed.js
+DEFAULT_ADMIN_PASSWORD="$DEFAULT_ADMIN_PASSWORD" \
+DEFAULT_ADMIN_DISCORD_ID="$DEFAULT_ADMIN_DISCORD_ID" \
+DEFAULT_ADMIN_USERNAME="$DEFAULT_ADMIN_USERNAME" \
+node dist/utils/seed.js
 echo -e "${GREEN}✓ Kezdeti adatok betöltve${NC}"
 
 # Install frontend dependencies

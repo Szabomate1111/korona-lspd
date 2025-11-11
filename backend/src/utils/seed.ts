@@ -12,20 +12,20 @@ const seedData = async () => {
     if (ownerCheck.rows.length === 0) {
       // Check if we should create a default admin
       const defaultPassword = process.env.DEFAULT_ADMIN_PASSWORD;
+      const defaultDiscordId = process.env.DEFAULT_ADMIN_DISCORD_ID || `temp_admin_${Date.now()}`;
+      const defaultUsername = process.env.DEFAULT_ADMIN_USERNAME || 'DefaultAdmin';
 
       if (defaultPassword) {
-        // Create a default admin with a placeholder Discord ID
-        // This allows the system to be usable immediately after install
-        const defaultDiscordId = `temp_admin_${Date.now()}`;
+        // Create a default admin
         await client.query(
           `INSERT INTO users (discord_id, username, role)
            VALUES ($1, $2, $3)`,
-          [defaultDiscordId, 'DefaultAdmin', 'owner']
+          [defaultDiscordId, defaultUsername, 'owner']
         );
         console.log('✅ Default admin created!');
-        console.log('   ⚠️  FONTOS: Add hozzá magad Discord ID-dal később!');
-        console.log('   Használd: ./add-admin.sh YOUR_DISCORD_ID YourUsername');
-        console.log(`   Ideiglenes ID: ${defaultDiscordId}`);
+        console.log(`   Username: ${defaultUsername}`);
+        console.log(`   Discord ID: ${defaultDiscordId}`);
+        console.log('   ⚠️  Most már be tudsz jelentkezni Discord-on keresztül!');
       } else {
         console.log('⚠️  No owner found. Please add an owner manually with their Discord ID.');
         console.log('   Example: INSERT INTO users (discord_id, username, role) VALUES (\'YOUR_DISCORD_ID\', \'YourName\', \'owner\');');
