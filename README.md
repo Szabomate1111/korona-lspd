@@ -5,12 +5,14 @@ Modern, teljes körű tagfelvételi rendszer dinamikus kérdéskezeléssel, past
 ## 🚀 Gyors telepítés (egy parancs!)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Szabomate1111/korona-lspd/claude/tgf-system-design-011CV1pi8CdTVooPuS1BXAh6/quick-install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Szabomate1111/korona-lspd/claude/tgf-system-design-011CV1pi8CdTVooPuS1BXAh6/quick-install.sh | sudo bash
 ```
 
 **[→ Részletes magyar telepítési útmutató](README_INSTALL.md)**
 
 Ez automatikusan telepít mindent: Node.js, PostgreSQL, a teljes alkalmazást, és előkészíti az indításhoz.
+
+**Megjegyzés:** A script root jogosultságot igényel (sudo vagy root shell).
 
 ## 🎯 Funkciók
 

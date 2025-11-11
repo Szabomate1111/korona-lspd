@@ -7,7 +7,7 @@
 Másold be ezt a parancsot a terminálba és nyomj Enter-t:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Szabomate1111/korona-lspd/claude/tgf-system-design-011CV1pi8CdTVooPuS1BXAh6/quick-install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Szabomate1111/korona-lspd/claude/tgf-system-design-011CV1pi8CdTVooPuS1BXAh6/quick-install.sh | sudo bash
 ```
 
 **Ez telepíti:**
@@ -17,6 +17,8 @@ curl -fsSL https://raw.githubusercontent.com/Szabomate1111/korona-lspd/claude/tg
 - ✅ Mindent beállít automatikusan
 
 **Helye:** `~/tgf-app`
+
+**⚠️ Fontos:** A script root jogosultságot igényel (sudo vagy root shell), mert telepíteni kell csomagokat és konfigurálni a PostgreSQL-t.
 
 ---
 

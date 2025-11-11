@@ -30,11 +30,18 @@ TEMP_DIR="/tmp/tgf-install-$$"
 
 echo -e "${YELLOW}📥 Projekt letöltése...${NC}"
 
+# Check if running as root
+if [ "$EUID" -ne 0 ]; then
+   echo -e "${RED}❌ Ezt a scriptet root-ként kell futtatni!${NC}"
+   echo -e "${YELLOW}Használat: sudo bash quick-install.sh vagy root shell-ből${NC}"
+   exit 1
+fi
+
 # Check if git is installed
 if ! command -v git &> /dev/null; then
     echo -e "${YELLOW}Git telepítése...${NC}"
-    sudo apt-get update -qq
-    sudo apt-get install -y git > /dev/null 2>&1
+    apt-get update -qq
+    apt-get install -y git > /dev/null 2>&1
 fi
 
 # Clone repository to temp directory

@@ -40,33 +40,28 @@ EOF
 echo -e "${NC}"
 
 # Check if running as root
-if [ "$EUID" -eq 0 ]; then
-   echo -e "${RED}❌ Ne futtasd root-ként! Futtasd normál felhasználóként (sudo jogosultságokkal).${NC}"
+if [ "$EUID" -ne 0 ]; then
+   echo -e "${RED}❌ Ezt a scriptet root-ként kell futtatni!${NC}"
+   echo -e "${YELLOW}Használat: sudo ./install.sh vagy root shell-ből${NC}"
    exit 1
 fi
 
-# Check for sudo
-if ! sudo -v; then
-    echo -e "${RED}❌ Sudo jogosultság szükséges!${NC}"
-    exit 1
-fi
-
-echo -e "${GREEN}✓ Sudo jogosultság rendben${NC}"
+echo -e "${GREEN}✓ Root jogosultság rendben${NC}"
 
 # Update system
 echo -e "\n${YELLOW}📦 Rendszer frissítése...${NC}"
-sudo apt-get update -qq
+apt-get update -qq
 
 # Install dependencies
 echo -e "${YELLOW}📦 Alapvető csomagok telepítése...${NC}"
-sudo apt-get install -y curl wget git build-essential openssl postgresql postgresql-contrib > /dev/null 2>&1
+apt-get install -y curl wget git build-essential openssl postgresql postgresql-contrib > /dev/null 2>&1
 echo -e "${GREEN}✓ Alapvető csomagok telepítve${NC}"
 
 # Install Node.js (via NodeSource)
 if ! command -v node &> /dev/null; then
     echo -e "${YELLOW}📦 Node.js telepítése...${NC}"
-    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - > /dev/null 2>&1
-    sudo apt-get install -y nodejs > /dev/null 2>&1
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - > /dev/null 2>&1
+    apt-get install -y nodejs > /dev/null 2>&1
     echo -e "${GREEN}✓ Node.js $(node -v) telepítve${NC}"
 else
     echo -e "${GREEN}✓ Node.js már telepítve: $(node -v)${NC}"
@@ -76,19 +71,19 @@ fi
 echo -e "\n${YELLOW}🐘 PostgreSQL beállítása...${NC}"
 
 # Start PostgreSQL
-sudo systemctl start postgresql
-sudo systemctl enable postgresql > /dev/null 2>&1
+systemctl start postgresql
+systemctl enable postgresql > /dev/null 2>&1
 
 # Set postgres user password
-sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD '$POSTGRES_PASSWORD';" > /dev/null 2>&1
+su - postgres -c "psql -c \"ALTER USER postgres WITH PASSWORD '$POSTGRES_PASSWORD';\"" > /dev/null 2>&1
 
 # Create database user
-sudo -u postgres psql -c "DROP USER IF EXISTS $DB_USER;" > /dev/null 2>&1
-sudo -u postgres psql -c "CREATE USER $DB_USER WITH PASSWORD '$DB_PASSWORD';" > /dev/null 2>&1
+su - postgres -c "psql -c \"DROP USER IF EXISTS $DB_USER;\"" > /dev/null 2>&1
+su - postgres -c "psql -c \"CREATE USER $DB_USER WITH PASSWORD '$DB_PASSWORD';\"" > /dev/null 2>&1
 
 # Create database
-sudo -u postgres psql -c "DROP DATABASE IF EXISTS $DB_NAME;" > /dev/null 2>&1
-sudo -u postgres psql -c "CREATE DATABASE $DB_NAME OWNER $DB_USER;" > /dev/null 2>&1
+su - postgres -c "psql -c \"DROP DATABASE IF EXISTS $DB_NAME;\"" > /dev/null 2>&1
+su - postgres -c "psql -c \"CREATE DATABASE $DB_NAME OWNER $DB_USER;\"" > /dev/null 2>&1
 
 echo -e "${GREEN}✓ PostgreSQL beállítva${NC}"
 echo -e "  Database: $DB_NAME"
