@@ -6,8 +6,30 @@
 
 Másold be ezt a parancsot a terminálba és nyomj Enter-t:
 
+**Módszer 1 - Ha van sudo a rendszeren (Ubuntu, Debian újabb verziók):**
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Szabomate1111/korona-lspd/claude/tgf-system-design-011CV1pi8CdTVooPuS1BXAh6/quick-install.sh | sudo bash
+```
+
+**Módszer 2 - Ha nincs sudo (alapértelmezett Debian, csak su van):**
+```bash
+su -
+curl -fsSL https://raw.githubusercontent.com/Szabomate1111/korona-lspd/claude/tgf-system-design-011CV1pi8CdTVooPuS1BXAh6/quick-install.sh | bash
+exit
+```
+
+**Módszer 3 - Lokális fájlból (ha már letöltötted):**
+```bash
+# Root shell-be lépés
+su -
+
+# Vagy ha van sudo
+sudo -i
+
+# Telepítés
+cd /path/to/korona-lspd
+chmod +x install.sh
+./install.sh
 ```
 
 **Ez telepíti:**
@@ -16,9 +38,9 @@ curl -fsSL https://raw.githubusercontent.com/Szabomate1111/korona-lspd/claude/tg
 - ✅ A teljes TGF rendszert
 - ✅ Mindent beállít automatikusan
 
-**Helye:** `~/tgf-app`
+**Helye:** `~/tgf-app` vagy `/root/tgf-app` (ha root shell-ből futtatod)
 
-**⚠️ Fontos:** A script root jogosultságot igényel (sudo vagy root shell), mert telepíteni kell csomagokat és konfigurálni a PostgreSQL-t.
+**⚠️ Fontos:** A script root jogosultságot igényel, mert telepíteni kell csomagokat és konfigurálni a PostgreSQL-t.
 
 ---
 
@@ -301,6 +323,14 @@ crontab -e
 ---
 
 ## ❓ GYIK
+
+**Q: "sudo: command not found" hibát kapok!**
+A: Alapértelmezett Debian-on nincs sudo telepítve. Használd inkább az `su -` módszert:
+```bash
+su -
+curl -fsSL https://raw.githubusercontent.com/Szabomate1111/korona-lspd/claude/tgf-system-design-011CV1pi8CdTVooPuS1BXAh6/quick-install.sh | bash
+```
+Vagy telepítsd a sudo-t: `apt-get install sudo` (root shell-ből)
 
 **Q: Mikor lesz elérhető a weboldal?**
 A: Azonnal a `./start.sh` futtatása után, kb. 5 másodperc múlva.

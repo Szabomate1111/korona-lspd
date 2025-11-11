@@ -42,7 +42,12 @@ echo -e "${NC}"
 # Check if running as root
 if [ "$EUID" -ne 0 ]; then
    echo -e "${RED}❌ Ezt a scriptet root-ként kell futtatni!${NC}"
-   echo -e "${YELLOW}Használat: sudo ./install.sh vagy root shell-ből${NC}"
+   echo -e "${YELLOW}Használat:${NC}"
+   echo -e "  ${GREEN}su -${NC}         # root shell-be lépés (Debian)"
+   echo -e "  ${GREEN}./install.sh${NC}  # script futtatása"
+   echo -e ""
+   echo -e "${YELLOW}Vagy ha van sudo:${NC}"
+   echo -e "  ${GREEN}sudo ./install.sh${NC}"
    exit 1
 fi
 
