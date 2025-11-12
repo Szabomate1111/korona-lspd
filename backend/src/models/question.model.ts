@@ -29,6 +29,8 @@ export const QuestionModel = {
     type: string;
     options?: string[];
     is_required: boolean;
+    min_length?: number;
+    max_length?: number;
     order_index: number;
     category_id?: number;
   }): Promise<Question> {
@@ -41,8 +43,8 @@ export const QuestionModel = {
     const version = existing.rows[0]?.max_version ? existing.rows[0].max_version + 1 : 1;
 
     const result = await pool.query(
-      `INSERT INTO questions (question_text, field_key, type, options, is_required, order_index, version, active, category_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8)
+      `INSERT INTO questions (question_text, field_key, type, options, is_required, min_length, max_length, order_index, version, active, category_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, true, $10)
        RETURNING *`,
       [
         data.question_text,
@@ -50,6 +52,8 @@ export const QuestionModel = {
         data.type,
         data.options ? JSON.stringify(data.options) : null,
         data.is_required,
+        data.min_length || null,
+        data.max_length || null,
         data.order_index,
         version,
         data.category_id || null,
@@ -66,6 +70,8 @@ export const QuestionModel = {
       type?: string;
       options?: string[];
       is_required?: boolean;
+      min_length?: number;
+      max_length?: number;
       order_index?: number;
       category_id?: number;
     }
@@ -83,8 +89,8 @@ export const QuestionModel = {
 
     // Insert new version
     const result = await pool.query(
-      `INSERT INTO questions (question_text, field_key, type, options, is_required, order_index, version, active, category_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8)
+      `INSERT INTO questions (question_text, field_key, type, options, is_required, min_length, max_length, order_index, version, active, category_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, true, $10)
        RETURNING *`,
       [
         data.question_text || current.question_text,
@@ -92,6 +98,8 @@ export const QuestionModel = {
         data.type || current.type,
         data.options ? JSON.stringify(data.options) : current.options,
         data.is_required !== undefined ? data.is_required : current.is_required,
+        data.min_length !== undefined ? data.min_length : current.min_length,
+        data.max_length !== undefined ? data.max_length : current.max_length,
         data.order_index !== undefined ? data.order_index : current.order_index,
         newVersion,
         data.category_id !== undefined ? data.category_id : current.category_id,

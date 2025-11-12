@@ -9,6 +9,8 @@ const CreateQuestionSchema = z.object({
   type: z.enum(['text', 'textarea', 'select', 'radio', 'checkbox']),
   options: z.array(z.string()).optional(),
   is_required: z.boolean(),
+  min_length: z.number().int().min(0).optional(),
+  max_length: z.number().int().min(1).optional(),
   order_index: z.number().int(),
   category_id: z.number().int().optional(),
 });
@@ -18,6 +20,8 @@ const UpdateQuestionSchema = z.object({
   type: z.enum(['text', 'textarea', 'select', 'radio', 'checkbox']).optional(),
   options: z.array(z.string()).optional(),
   is_required: z.boolean().optional(),
+  min_length: z.number().int().min(0).optional(),
+  max_length: z.number().int().min(1).optional(),
   order_index: z.number().int().optional(),
   category_id: z.number().int().optional(),
 });

@@ -50,6 +50,13 @@ const updateSchema = async () => {
       ADD COLUMN IF NOT EXISTS category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL
     `);
 
+    // Add min_length and max_length to questions for validation
+    await client.query(`
+      ALTER TABLE questions
+      ADD COLUMN IF NOT EXISTS min_length INTEGER,
+      ADD COLUMN IF NOT EXISTS max_length INTEGER
+    `);
+
     // Insert default categories
     const categoryCheck = await client.query('SELECT COUNT(*) FROM categories');
 

@@ -16,6 +16,8 @@ export interface Question {
   type: 'text' | 'textarea' | 'select' | 'radio' | 'checkbox';
   options?: string[];
   is_required: boolean;
+  min_length?: number;
+  max_length?: number;
   order_index: number;
   version: number;
   active: boolean;

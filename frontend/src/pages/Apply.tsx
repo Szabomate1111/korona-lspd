@@ -1,15 +1,13 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { questionsApi, applicationsApi } from '../services/api';
-import { Question } from '../types';
+import { questionsApi, applicationsApi, categoriesApi } from '../services/api';
+import { Question, Category } from '../types';
 import { PasteTracker } from '../utils/paste-tracker';
 import { localStorageUtils } from '../utils/local-storage';
 import ProgressBar from '../components/ProgressBar';
 import Loader from '../components/Loader';
 import { ArrowLeft, ArrowRight, Send } from 'lucide-react';
-
-const STEPS = ['Alapadatok', 'Karakter', 'Motiváció', 'Tapasztalat', 'Ellenőrzés'];
 
 export default function Apply() {
   const navigate = useNavigate();
@@ -17,12 +15,13 @@ export default function Apply() {
   const [submitting, setSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pasteTracker] = useState(() => new PasteTracker());
 
   useEffect(() => {
-    loadQuestions();
+    loadData();
     loadDraft();
   }, []);
 
@@ -33,13 +32,22 @@ export default function Apply() {
     }
   }, [answers]);
 
-  const loadQuestions = async () => {
+  const loadData = async () => {
     try {
-      const { data } = await questionsApi.getActive();
-      setQuestions(data.questions);
+      const [questionsRes, categoriesRes] = await Promise.all([
+        questionsApi.getActive(),
+        categoriesApi.getActive(),
+      ]);
+
+      setQuestions(questionsRes.data.questions);
+      // Filter out "Áttekintés" category and sort by order_index
+      const activeCategories = categoriesRes.data.categories
+        .filter(c => c.name !== 'Áttekintés')
+        .sort((a, b) => a.order_index - b.order_index);
+      setCategories(activeCategories);
     } catch (error) {
-      console.error('Failed to load questions:', error);
-      alert('Nem sikerült betölteni a kérdéseket. Kérlek frissítsd az oldalt.');
+      console.error('Failed to load data:', error);
+      alert('Nem sikerült betölteni az adatokat. Kérlek frissítsd az oldalt.');
     } finally {
       setLoading(false);
     }
@@ -72,14 +80,24 @@ export default function Apply() {
     const newErrors: Record<string, string> = {};
 
     stepQuestions.forEach((question) => {
-      if (question.is_required && !answers[question.field_key]?.trim()) {
+      const answer = answers[question.field_key]?.trim() || '';
+
+      // Check required
+      if (question.is_required && !answer) {
         newErrors[question.field_key] = 'Ez a mező kötelező';
-      } else if (
-        answers[question.field_key] &&
-        question.type === 'textarea' &&
-        answers[question.field_key].length < 120
-      ) {
-        newErrors[question.field_key] = 'Minimum 120 karakter szükséges';
+        return;
+      }
+
+      // Check min length
+      if (answer && question.min_length && answer.length < question.min_length) {
+        newErrors[question.field_key] = `Minimum ${question.min_length} karakter szükséges`;
+        return;
+      }
+
+      // Check max length
+      if (answer && question.max_length && answer.length > question.max_length) {
+        newErrors[question.field_key] = `Maximum ${question.max_length} karakter engedélyezett`;
+        return;
       }
     });
 
@@ -88,14 +106,23 @@ export default function Apply() {
   };
 
   const getQuestionsForStep = (step: number): Question[] => {
-    const questionsPerStep = Math.ceil(questions.length / (STEPS.length - 1));
-    if (step === STEPS.length - 1) return questions; // Review step
-    return questions.slice(step * questionsPerStep, (step + 1) * questionsPerStep);
+    // Review step shows all questions
+    if (step === categories.length) return questions;
+
+    // Get questions for the current category
+    const category = categories[step];
+    if (!category) return [];
+
+    return questions.filter(q => q.category_id === category.id);
+  };
+
+  const getStepLabels = (): string[] => {
+    return [...categories.map(c => c.name), 'Ellenőrzés'];
   };
 
   const handleNext = () => {
     if (validateStep()) {
-      setCurrentStep((prev) => Math.min(prev + 1, STEPS.length - 1));
+      setCurrentStep((prev) => Math.min(prev + 1, categories.length));
     }
   };
 
@@ -137,7 +164,8 @@ export default function Apply() {
   }
 
   const stepQuestions = getQuestionsForStep(currentStep);
-  const isReviewStep = currentStep === STEPS.length - 1;
+  const isReviewStep = currentStep === categories.length;
+  const stepLabels = getStepLabels();
 
   return (
     <div className="min-h-screen py-12 px-4">
@@ -150,7 +178,7 @@ export default function Apply() {
           Jelentkezés - LSPD
         </motion.h1>
 
-        <ProgressBar steps={STEPS} currentStep={currentStep} />
+        <ProgressBar steps={stepLabels} currentStep={currentStep} />
 
         <AnimatePresence mode="wait">
           <motion.div
@@ -168,57 +196,85 @@ export default function Apply() {
                   Kérlek ellenőrizd válaszaid, majd küldd be a jelentkezést.
                 </p>
                 <div className="space-y-6">
-                  {questions.map((question) => (
-                    <div key={question.id} className="border-b border-dark-700 pb-4">
-                      <p className="text-sm text-gray-400 mb-2">{question.question_text}</p>
-                      <p className="text-white whitespace-pre-wrap">
-                        {answers[question.field_key] || '-'}
-                      </p>
-                    </div>
-                  ))}
+                  {categories.map((category) => {
+                    const categoryQuestions = questions.filter(q => q.category_id === category.id);
+                    if (categoryQuestions.length === 0) return null;
+
+                    return (
+                      <div key={category.id} className="border border-dark-700 rounded-lg p-4">
+                        <h3 className="text-lg font-semibold mb-4 text-primary-500">
+                          {category.name}
+                        </h3>
+                        <div className="space-y-4">
+                          {categoryQuestions.map((question) => (
+                            <div key={question.id} className="border-b border-dark-700 pb-3 last:border-0">
+                              <p className="text-sm text-gray-400 mb-2">{question.question_text}</p>
+                              <p className="text-white whitespace-pre-wrap">
+                                {answers[question.field_key] || '-'}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             ) : (
-              <div className="space-y-6">
-                {stepQuestions.map((question) => (
-                  <div key={question.id}>
-                    <label className="label">
-                      {question.question_text}
-                      {question.is_required && <span className="text-danger-500 ml-1">*</span>}
-                    </label>
-                    {question.type === 'textarea' ? (
-                      <textarea
-                        className={`textarea ${errors[question.field_key] ? 'border-danger-500' : ''}`}
-                        rows={6}
-                        value={answers[question.field_key] || ''}
-                        onChange={(e) => handleInputChange(question.field_key, e.target.value)}
-                        onPaste={() =>
-                          handlePaste(question.field_key, answers[question.field_key] || '')
-                        }
-                        placeholder="Válaszod..."
-                      />
-                    ) : (
-                      <input
-                        type="text"
-                        className={`input ${errors[question.field_key] ? 'border-danger-500' : ''}`}
-                        value={answers[question.field_key] || ''}
-                        onChange={(e) => handleInputChange(question.field_key, e.target.value)}
-                        onPaste={() =>
-                          handlePaste(question.field_key, answers[question.field_key] || '')
-                        }
-                        placeholder="Válaszod..."
-                      />
-                    )}
-                    {errors[question.field_key] && (
-                      <p className="text-danger-500 text-sm mt-1">{errors[question.field_key]}</p>
-                    )}
-                    {question.type === 'textarea' && answers[question.field_key] && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        {answers[question.field_key].length} karakter
-                      </p>
-                    )}
-                  </div>
-                ))}
+              <div>
+                <h2 className="text-2xl font-bold mb-6">
+                  {categories[currentStep]?.name}
+                </h2>
+                {categories[currentStep]?.description && (
+                  <p className="text-gray-400 mb-6">
+                    {categories[currentStep].description}
+                  </p>
+                )}
+                <div className="space-y-6">
+                  {stepQuestions.map((question) => (
+                    <div key={question.id}>
+                      <label className="label">
+                        {question.question_text}
+                        {question.is_required && <span className="text-danger-500 ml-1">*</span>}
+                      </label>
+                      {question.type === 'textarea' ? (
+                        <textarea
+                          className={`textarea ${errors[question.field_key] ? 'border-danger-500' : ''}`}
+                          rows={6}
+                          value={answers[question.field_key] || ''}
+                          onChange={(e) => handleInputChange(question.field_key, e.target.value)}
+                          onPaste={() =>
+                            handlePaste(question.field_key, answers[question.field_key] || '')
+                          }
+                          placeholder="Válaszod..."
+                          maxLength={question.max_length}
+                        />
+                      ) : (
+                        <input
+                          type="text"
+                          className={`input ${errors[question.field_key] ? 'border-danger-500' : ''}`}
+                          value={answers[question.field_key] || ''}
+                          onChange={(e) => handleInputChange(question.field_key, e.target.value)}
+                          onPaste={() =>
+                            handlePaste(question.field_key, answers[question.field_key] || '')
+                          }
+                          placeholder="Válaszod..."
+                          maxLength={question.max_length}
+                        />
+                      )}
+                      {errors[question.field_key] && (
+                        <p className="text-danger-500 text-sm mt-1">{errors[question.field_key]}</p>
+                      )}
+                      {(question.type === 'textarea' || question.type === 'text') && answers[question.field_key] && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          {answers[question.field_key].length}
+                          {question.max_length && ` / ${question.max_length}`} karakter
+                          {question.min_length && ` (min: ${question.min_length})`}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </motion.div>

@@ -29,6 +29,8 @@ export interface Question {
   type: 'text' | 'textarea' | 'select' | 'radio' | 'checkbox';
   options?: string[]; // for select/radio/checkbox
   is_required: boolean;
+  min_length?: number; // minimum character length for text/textarea
+  max_length?: number; // maximum character length for text/textarea
   order_index: number;
   version: number;
   active: boolean;
