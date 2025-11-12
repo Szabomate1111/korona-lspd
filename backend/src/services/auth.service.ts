@@ -58,10 +58,19 @@ export const AuthService = {
       throw new Error('User not authorized. Contact an owner to add you as admin.');
     }
 
+    // Update user info from Discord
+    user = await UserModel.updateDiscordInfo(user.id, {
+      username: discordUser.username,
+      avatar: discordUser.avatar || undefined,
+      discriminator: discordUser.discriminator,
+    });
+
     // Generate JWT
     const payload: AuthPayload = {
       userId: user.id,
       role: user.role,
+      username: user.username,
+      avatar: user.avatar,
     };
 
     const token = jwt.sign(payload, config.jwtSecret, { expiresIn: '7d' });

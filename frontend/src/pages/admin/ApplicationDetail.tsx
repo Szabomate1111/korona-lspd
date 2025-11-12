@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { applicationsApi } from '../../services/api';
 import { Application } from '../../types';
 import Loader from '../../components/Loader';

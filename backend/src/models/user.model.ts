@@ -1,5 +1,5 @@
 import pool from '../config/database';
-import { User } from '../types';
+import { User, UserRole } from '../types';
 
 export const UserModel = {
   async findByDiscordId(discordId: string): Promise<User | null> {
@@ -19,7 +19,7 @@ export const UserModel = {
     discord_id: string;
     username: string;
     avatar?: string;
-    role: 'owner' | 'admin';
+    role: UserRole;
   }): Promise<User> {
     const result = await pool.query(
       `INSERT INTO users (discord_id, username, avatar, role)
@@ -39,10 +39,28 @@ export const UserModel = {
     await pool.query('DELETE FROM users WHERE id = $1', [id]);
   },
 
-  async updateRole(id: number, role: 'owner' | 'admin'): Promise<User> {
+  async updateRole(id: number, role: UserRole): Promise<User> {
     const result = await pool.query(
       'UPDATE users SET role = $1 WHERE id = $2 RETURNING *',
       [role, id]
+    );
+    return result.rows[0];
+  },
+
+  async updateDiscordInfo(
+    id: number,
+    data: {
+      username: string;
+      avatar?: string;
+      discriminator: string;
+    }
+  ): Promise<User> {
+    const result = await pool.query(
+      `UPDATE users
+       SET username = $1, avatar = $2, discriminator = $3, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $4
+       RETURNING *`,
+      [data.username, data.avatar, data.discriminator, id]
     );
     return result.rows[0];
   },

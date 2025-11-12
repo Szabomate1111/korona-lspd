@@ -10,6 +10,7 @@ const CreateQuestionSchema = z.object({
   options: z.array(z.string()).optional(),
   is_required: z.boolean(),
   order_index: z.number().int(),
+  category_id: z.number().int().optional(),
 });
 
 const UpdateQuestionSchema = z.object({
@@ -18,6 +19,7 @@ const UpdateQuestionSchema = z.object({
   options: z.array(z.string()).optional(),
   is_required: z.boolean().optional(),
   order_index: z.number().int().optional(),
+  category_id: z.number().int().optional(),
 });
 
 export const QuestionsController = {

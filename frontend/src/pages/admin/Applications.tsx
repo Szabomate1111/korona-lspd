@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { applicationsApi } from '../../services/api';
 import { Application } from '../../types';
 import Loader from '../../components/Loader';
-import { Search, Filter, AlertTriangle } from 'lucide-react';
+import { Search, AlertTriangle } from 'lucide-react';
 
 export default function Applications() {
   const navigate = useNavigate();

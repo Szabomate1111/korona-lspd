@@ -12,6 +12,7 @@ import {
   LogOut,
   Menu,
   X,
+  FolderTree,
 } from 'lucide-react';
 
 export default function AdminLayout() {
@@ -46,11 +47,17 @@ export default function AdminLayout() {
     }
   };
 
+  const isLeaderOrAbove = user?.role === 'rendszergazda' || user?.role === 'leader' || user?.role === 'owner';
+  const isRendszergazdaOrOwner = user?.role === 'rendszergazda' || user?.role === 'owner';
+
   const navItems = [
     { path: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
     { path: '/admin/applications', label: 'Jelentkezések', icon: FileText },
     { path: '/admin/questions', label: 'Kérdések', icon: HelpCircle },
-    ...(user?.role === 'owner'
+    ...(isLeaderOrAbove
+      ? [{ path: '/admin/categories', label: 'Kategóriák', icon: FolderTree }]
+      : []),
+    ...(isRendszergazdaOrOwner
       ? [{ path: '/admin/users', label: 'Adminok', icon: Users }]
       : []),
   ];

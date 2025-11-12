@@ -7,6 +7,7 @@ import Dashboard from './pages/admin/Dashboard';
 import Applications from './pages/admin/Applications';
 import ApplicationDetail from './pages/admin/ApplicationDetail';
 import Questions from './pages/admin/Questions';
+import Categories from './pages/admin/Categories';
 import Users from './pages/admin/Users';
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
           <Route path="applications" element={<Applications />} />
           <Route path="applications/:id" element={<ApplicationDetail />} />
           <Route path="questions" element={<Questions />} />
+          <Route path="categories" element={<Categories />} />
           <Route path="users" element={<Users />} />
         </Route>
 

@@ -30,6 +30,7 @@ export const QuestionModel = {
     options?: string[];
     is_required: boolean;
     order_index: number;
+    category_id?: number;
   }): Promise<Question> {
     // Check if field_key already exists
     const existing = await pool.query(
@@ -40,8 +41,8 @@ export const QuestionModel = {
     const version = existing.rows[0]?.max_version ? existing.rows[0].max_version + 1 : 1;
 
     const result = await pool.query(
-      `INSERT INTO questions (question_text, field_key, type, options, is_required, order_index, version, active)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, true)
+      `INSERT INTO questions (question_text, field_key, type, options, is_required, order_index, version, active, category_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8)
        RETURNING *`,
       [
         data.question_text,
@@ -51,6 +52,7 @@ export const QuestionModel = {
         data.is_required,
         data.order_index,
         version,
+        data.category_id || null,
       ]
     );
 
@@ -65,6 +67,7 @@ export const QuestionModel = {
       options?: string[];
       is_required?: boolean;
       order_index?: number;
+      category_id?: number;
     }
   ): Promise<Question> {
     const current = await this.getById(id);
@@ -80,8 +83,8 @@ export const QuestionModel = {
 
     // Insert new version
     const result = await pool.query(
-      `INSERT INTO questions (question_text, field_key, type, options, is_required, order_index, version, active)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, true)
+      `INSERT INTO questions (question_text, field_key, type, options, is_required, order_index, version, active, category_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8)
        RETURNING *`,
       [
         data.question_text || current.question_text,
@@ -91,6 +94,7 @@ export const QuestionModel = {
         data.is_required !== undefined ? data.is_required : current.is_required,
         data.order_index !== undefined ? data.order_index : current.order_index,
         newVersion,
+        data.category_id !== undefined ? data.category_id : current.category_id,
       ]
     );
 

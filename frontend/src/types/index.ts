@@ -1,5 +1,16 @@
+export interface Category {
+  id: number;
+  name: string;
+  description?: string;
+  order_index: number;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Question {
   id: number;
+  category_id?: number;
   question_text: string;
   field_key: string;
   type: 'text' | 'textarea' | 'select' | 'radio' | 'checkbox';
@@ -66,16 +77,22 @@ export interface ApplicationStats {
   pastedCount: number;
 }
 
+export type UserRole = 'rendszergazda' | 'leader' | 'al-leader' | 'admin' | 'owner';
+
 export interface User {
   id: number;
   discord_id: string;
   username: string;
   avatar?: string;
-  role: 'owner' | 'admin';
+  discriminator?: string;
+  role: UserRole;
   created_at: string;
+  updated_at: string;
 }
 
 export interface AuthUser {
   userId: number;
-  role: 'owner' | 'admin';
+  role: UserRole;
+  username: string;
+  avatar?: string;
 }

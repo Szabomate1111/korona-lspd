@@ -28,7 +28,7 @@ export const requireOwner = (req: AuthRequest, res: Response, next: NextFunction
     return res.status(401).json({ error: 'Unauthorized', code: 'UNAUTHORIZED' });
   }
 
-  if (req.user.role !== 'owner') {
+  if (req.user.role !== 'owner' && req.user.role !== 'rendszergazda') {
     return res.status(403).json({ error: 'Owner access required', code: 'FORBIDDEN' });
   }
 
@@ -40,8 +40,36 @@ export const requireAdmin = (req: AuthRequest, res: Response, next: NextFunction
     return res.status(401).json({ error: 'Unauthorized', code: 'UNAUTHORIZED' });
   }
 
-  if (req.user.role !== 'owner' && req.user.role !== 'admin') {
+  const allowedRoles = ['owner', 'admin', 'rendszergazda', 'leader', 'al-leader'];
+  if (!allowedRoles.includes(req.user.role)) {
     return res.status(403).json({ error: 'Admin access required', code: 'FORBIDDEN' });
+  }
+
+  next();
+};
+
+// Leader+ roles (can manage categories and questions)
+export const requireLeader = (req: AuthRequest, res: Response, next: NextFunction) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Unauthorized', code: 'UNAUTHORIZED' });
+  }
+
+  const allowedRoles = ['rendszergazda', 'leader', 'owner'];
+  if (!allowedRoles.includes(req.user.role)) {
+    return res.status(403).json({ error: 'Leader access required', code: 'FORBIDDEN' });
+  }
+
+  next();
+};
+
+// Rendszergazda only
+export const requireRendszergazda = (req: AuthRequest, res: Response, next: NextFunction) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Unauthorized', code: 'UNAUTHORIZED' });
+  }
+
+  if (req.user.role !== 'rendszergazda' && req.user.role !== 'owner') {
+    return res.status(403).json({ error: 'System admin access required', code: 'FORBIDDEN' });
   }
 
   next();

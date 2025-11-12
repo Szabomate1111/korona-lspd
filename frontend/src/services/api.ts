@@ -6,6 +6,8 @@ import type {
   ApplicationStats,
   User,
   AuthUser,
+  Category,
+  Question,
 } from '../types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
@@ -69,6 +71,20 @@ export const usersApi = {
   delete: (id: number) => api.delete(`/users/${id}`),
   updateRole: (id: number, role: 'owner' | 'admin') =>
     api.patch<{ user: User }>(`/users/${id}/role`, { role }),
+};
+
+// Categories
+export const categoriesApi = {
+  getActive: () => api.get<{ categories: Category[] }>('/categories/active'),
+  getAll: () => api.get<{ categories: Category[] }>('/categories/all'),
+  getById: (id: number) => api.get<{ category: Category }>(`/categories/${id}`),
+  create: (data: { name: string; description?: string; order_index: number }) =>
+    api.post<{ category: Category }>('/categories', data),
+  update: (id: number, data: { name?: string; description?: string; order_index?: number; active?: boolean }) =>
+    api.patch<{ category: Category }>(`/categories/${id}`, data),
+  updateOrder: (order: Array<{ id: number; order_index: number }>) =>
+    api.patch('/categories/order/update', { order }),
+  delete: (id: number) => api.delete(`/categories/${id}`),
 };
 
 export default api;
