@@ -6,21 +6,24 @@ const seedData = async () => {
   try {
     await client.query('BEGIN');
 
-    // Check if owner exists
-    const ownerCheck = await client.query('SELECT id FROM users WHERE role = $1 LIMIT 1', ['owner']);
+    // Check if rendszergazda exists
+    const adminCheck = await client.query(
+      'SELECT id FROM users WHERE role IN ($1, $2) LIMIT 1',
+      ['rendszergazda', 'owner']
+    );
 
-    if (ownerCheck.rows.length === 0) {
+    if (adminCheck.rows.length === 0) {
       // Check if we should create a default admin
       const defaultPassword = process.env.DEFAULT_ADMIN_PASSWORD;
       const defaultDiscordId = process.env.DEFAULT_ADMIN_DISCORD_ID || `temp_admin_${Date.now()}`;
       const defaultUsername = process.env.DEFAULT_ADMIN_USERNAME || 'DefaultAdmin';
 
       if (defaultPassword) {
-        // Create a default admin
+        // Create a default rendszergazda
         await client.query(
           `INSERT INTO users (discord_id, username, role)
            VALUES ($1, $2, $3)`,
-          [defaultDiscordId, defaultUsername, 'owner']
+          [defaultDiscordId, defaultUsername, 'rendszergazda']
         );
         console.log('✅ Default admin created!');
         console.log(`   Username: ${defaultUsername}`);
@@ -31,7 +34,7 @@ const seedData = async () => {
         console.log('   Example: INSERT INTO users (discord_id, username, role) VALUES (\'YOUR_DISCORD_ID\', \'YourName\', \'owner\');');
       }
     } else {
-      console.log('ℹ️  Owner already exists, skipping default admin creation');
+      console.log('ℹ️  Rendszergazda already exists, skipping default admin creation');
     }
 
     // Seed default questions

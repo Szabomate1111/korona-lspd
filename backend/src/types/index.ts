@@ -1,14 +1,29 @@
+export type UserRole = 'rendszergazda' | 'leader' | 'al-leader' | 'admin' | 'owner';
+
 export interface User {
   id: number;
   discord_id: string;
   username: string;
   avatar?: string;
-  role: 'owner' | 'admin';
+  discriminator?: string;
+  role: UserRole;
   created_at: Date;
+  updated_at: Date;
+}
+
+export interface Category {
+  id: number;
+  name: string;
+  description?: string;
+  order_index: number;
+  active: boolean;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface Question {
   id: number;
+  category_id?: number;
   question_text: string;
   field_key: string;
   type: 'text' | 'textarea' | 'select' | 'radio' | 'checkbox';
@@ -70,7 +85,9 @@ export interface ApplyRequest {
 
 export interface AuthPayload {
   userId: number;
-  role: 'owner' | 'admin';
+  role: UserRole;
+  username: string;
+  avatar?: string;
 }
 
 export interface Config {
