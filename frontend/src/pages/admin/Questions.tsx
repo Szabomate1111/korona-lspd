@@ -281,11 +281,13 @@ function QuestionModal({ question, categories, onClose, onSave }: QuestionModalP
           )}
 
           <div>
-            <label className="label">Mező kulcs * (egyedi azonosító)</label>
+            <label className="label">
+              Mező kulcs {!autoGenerateKey && !question && '*'} (egyedi azonosító)
+            </label>
             <input
               type="text"
               className="input"
-              required
+              required={!autoGenerateKey}
               disabled={!!question || autoGenerateKey}
               value={formData.field_key}
               onChange={(e) =>
@@ -299,8 +301,8 @@ function QuestionModal({ question, categories, onClose, onSave }: QuestionModalP
               </p>
             )}
             {autoGenerateKey && !question && (
-              <p className="text-xs text-gray-500 mt-1">
-                A mező kulcs automatikusan generálódik a kérdés szövegéből
+              <p className="text-xs text-green-500 mt-1">
+                ✓ Automatikusan generálva a kérdés szövegéből
               </p>
             )}
           </div>
